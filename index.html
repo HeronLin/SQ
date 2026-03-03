@@ -3,77 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>石器时代战斗追踪器 - 啉b制作 (授权版)</title>
+<title>石器时代战斗追踪器 - 管理员增强版</title>
 <style>
+/* 样式部分 */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root {
-  --bg: #ffffff; 
-  --card: #ffffff; --border: #cbd5e1; --fg: #0f172a; --muted: #64748b;
-  --primary: #22c55e; --primary-fg: #ffffff; --red: #ef4444; --yellow: #f59e0b;
-  --green: #10b981; --mirror-red: #ff3b30; --purple: #8b5cf6; --blue: #3b82f6;
-  --orange: #f97316; --lightblue: #0ea5e9; --secondary: #f1f5f9; --reset-gray: #94a3b8;
+  --bg: #ffffff; --card: #ffffff; --border: #cbd5e1; --fg: #0f172a; --muted: #64748b;
+  --primary: #22c55e; --red: #ef4444; --mirror-red: #ff3b30; --purple: #8b5cf6; 
+  --blue: #3b82f6; --orange: #f97316; --lightblue: #0ea5e9; --secondary: #f1f5f9; --reset-gray: #94a3b8;
   --pet-height: 90px;
 }
 html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; height: 100%; width: 100%; overflow-x: hidden; -webkit-tap-highlight-color: transparent; user-select: none; }
-
-/* 授权锁定遮罩 */
-#authOverlay { 
-    position:fixed; top:0; left:0; width:100%; height:100%; 
-    background:rgba(15,23,42,0.98); z-index:9999; 
-    display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; 
-}
+#authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; }
 #authOverlay input { width:300px; padding:15px; border-radius:10px; border:none; margin-bottom:20px; font-size:18px; text-align:center; outline:none; }
 #authOverlay button { width:300px; height:50px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px; }
-
-.app { display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; padding: 5px; cursor: default; }
-.header { width: 100%; max-width: 1250px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; z-index: 200; }
+.app { display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; padding: 5px; }
+.header { width: 100%; max-width: 1250px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
 .title { font-size: 16px; font-weight: 700; color: var(--primary); }
-
 .zoom-container { width: 1300px; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
 .field-container { position: relative; width: 1250px; height: 850px; padding-top: 10px; }
-
-.unit { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: opacity 0.3s ease; }
-
+.unit { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .char-block { width: 102px; height: 153px; background: var(--card); border: 2px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
 .char-block.selected { border-color: var(--primary); border-width: 4px; box-shadow: 0 0 18px rgba(34,197,94,0.4); }
-
 .mirror-zone { height: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; }
 .mirror-zone.off { background: var(--secondary); color: var(--muted); opacity: 0.4; }
 .mirror-zone.on { background: var(--mirror-red); color: white; }
-
 .select-zone { height: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900; width: 100%; cursor: pointer; }
-
 .energy-bar { width: 102px; height: 8px; background: var(--secondary); border-radius: 4px; overflow: hidden; margin: 2px 0; }
 .energy-fill { height: 100%; transition: width 0.3s; }
-
-.pet { 
-    width: 144px; height: var(--pet-height); border-radius: 45px; border: 2.5px solid var(--border); 
-    display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; 
-    background: #fff; cursor: pointer; transition: all 0.2s; transform-origin: center center;
-}
+.pet { width: 144px; height: var(--pet-height); border-radius: 45px; border: 2.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: #fff; cursor: pointer; transition: all 0.2s; transform-origin: center center; }
 .pet.on { background: var(--mirror-red) !important; color: white !important; border-color: var(--mirror-red) !important; }
-
-.floating-text {
-    position: absolute; color: var(--red); font-size: 44px; font-weight: 900;
-    pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 1000;
-    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
-}
-@keyframes floatUp {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-90px); opacity: 0; }
-}
-
-.team-a .unit:nth-child(1) .pet { transform: translate(25px, 63px) rotate(-34deg) scale(1.1); } 
-.team-a .unit:nth-child(2) .pet { transform: translate(55px, 39px) rotate(-34deg) scale(1.1); } 
-.team-a .unit:nth-child(3) .pet { transform: translate(85px, 15px) rotate(-34deg) scale(1.1); } 
-.team-a .unit:nth-child(4) .pet { transform: translate(115px, -9px) rotate(-34deg) scale(1.1); } 
-.team-a .unit:nth-child(5) .pet { transform: translate(145px, -33px) rotate(-34deg) scale(1.1); }
-.team-b .unit:nth-child(1) .pet { transform: translate(-145px, 33px) rotate(-34deg) scale(1.1); } 
-.team-b .unit:nth-child(2) .pet { transform: translate(-115px, 9px) rotate(-34deg) scale(1.1); } 
-.team-b .unit:nth-child(3) .pet { transform: translate(-85px, -15px) rotate(-34deg) scale(1.1); } 
-.team-b .unit:nth-child(4) .pet { transform: translate(-55px, -39px) rotate(-34deg) scale(1.1); } 
-.team-b .unit:nth-child(5) .pet { transform: translate(-25px, -63px) rotate(-34deg) scale(1.1); }
-
+.floating-text { position: absolute; color: var(--red); font-size: 44px; font-weight: 900; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 1000; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff; }
+@keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90px); opacity: 0; } }
 .team-a .unit:nth-child(1) { left: 60px;  top: 255px; } 
 .team-a .unit:nth-child(2) { left: 175px; top: 180px; } 
 .team-a .unit:nth-child(3) { left: 290px; top: 105px; } 
@@ -84,7 +45,16 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .team-b .unit:nth-child(3) { left: 720px; top: 445px; } 
 .team-b .unit:nth-child(4) { left: 835px; top: 370px; } 
 .team-b .unit:nth-child(5) { left: 950px; top: 295px; }
-
+.team-a .unit:nth-child(1) .pet { transform: translate(25px, 63px) rotate(-34deg) scale(1.1); } 
+.team-a .unit:nth-child(2) .pet { transform: translate(55px, 39px) rotate(-34deg) scale(1.1); } 
+.team-a .unit:nth-child(3) .pet { transform: translate(85px, 15px) rotate(-34deg) scale(1.1); } 
+.team-a .unit:nth-child(4) .pet { transform: translate(115px, -9px) rotate(-34deg) scale(1.1); } 
+.team-a .unit:nth-child(5) .pet { transform: translate(145px, -33px) rotate(-34deg) scale(1.1); }
+.team-b .unit:nth-child(1) .pet { transform: translate(-145px, 33px) rotate(-34deg) scale(1.1); } 
+.team-b .unit:nth-child(2) .pet { transform: translate(-115px, 9px) rotate(-34deg) scale(1.1); } 
+.team-b .unit:nth-child(3) .pet { transform: translate(-85px, -15px) rotate(-34deg) scale(1.1); } 
+.team-b .unit:nth-child(4) .pet { transform: translate(-55px, -39px) rotate(-34deg) scale(1.1); } 
+.team-b .unit:nth-child(5) .pet { transform: translate(-25px, -63px) rotate(-34deg) scale(1.1); }
 .controls-area { width: 1250px; padding: 15px; border-top: 1px solid #e2e8f0; background: #fff; margin-top: 30px; }
 .skill-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; }
 .skill-row-2 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; }
@@ -98,10 +68,13 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .skill-btn.primary { background: var(--primary); }
 .skill-btn.reset { background: var(--reset-gray); }
 .legend { text-align: center; font-size: 14px; color: var(--muted); margin-top: 8px; }
+#adminPanel { position:fixed; top:20px; right:20px; background:white; border:3px solid var(--primary); padding:20px; border-radius:15px; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:none; }
+#adminPanel h3 { margin-bottom:10px; color:var(--primary); }
+#adminPanel input { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; }
+#adminPanel .result { background:#f1f5f9; padding:10px; border-radius:5px; word-break:break-all; font-weight:bold; color:var(--red); min-height:40px; }
 </style>
 </head>
 <body onclick="S.clearSelect()">
-
 <div id="authOverlay">
     <h2 style="color:var(--primary);margin-bottom:20px;">系统授权</h2>
     <p style="margin-bottom:10px;opacity:0.8;">您的设备特征码:</p>
@@ -109,29 +82,33 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
     <input type="text" id="authKeyInput" placeholder="输入授权码">
     <button onclick="Auth.doVerify()">解锁系统</button>
 </div>
-
+<div id="adminPanel">
+    <h3>管理发号器</h3>
+    <input type="text" id="targetId" placeholder="贴入用户的特征码">
+    <button onclick="Admin.generate()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">生成授权码</button>
+    <div class="result" id="authResult"></div>
+    <button onclick="document.getElementById('adminPanel').style.display='none'" style="margin-top:10px; background:none; border:none; color:gray; cursor:pointer; width:100%;">关闭</button>
+</div>
 <div class="app" onclick="event.stopPropagation()">
     <div class="header">
         <div class="title">石器时代战斗追踪器 - 啉b制作</div>
-        <div class="status-info" id="scaleInfo">动画优化版</div>
+        <div class="status-info">正版授权系统</div>
     </div>
     <div class="zoom-container" id="zoomContainer">
         <div class="field-container" id="field" onclick="S.clearSelect()">
             <div id="unitLayer"></div>
-            <div id="effectLayer" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></div>
+            <div id="effectLayer" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
         </div>
         <div class="controls-area" onclick="event.stopPropagation()">
             <div class="skill-panel" id="row1"></div>
             <div class="skill-row-2" id="row2"></div>
             <div class="bottom-row" id="row3"></div>
-            <div class="legend">快捷键: 1-9 | Q 补满 | R 重置 | Z 撤销 | 红色气量文字漂浮版</div>
+            <div class="legend">快捷键: 1-9 | Q 补满 | R 重置 | Z 撤销 | 连点5下开启后台</div>
         </div>
     </div>
 </div>
-
 <script>
 (function(){
-    // --- 授权模块 ---
     window.Auth = {
         _S: "LB_STONE_FINAL_2026", 
         _GID: () => {
@@ -157,59 +134,45 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             const input = document.getElementById('authKeyInput').value.trim().toUpperCase();
             if(input === Auth._GK(Auth._GID())) {
                 localStorage.setItem('_AUTH_OK', input);
-                alert("授权成功！");
-                location.reload();
+                alert("授权成功！"); location.reload();
             } else { alert("授权码无效！"); }
         }
     };
-
+    let clickCount = 0;
+    window.Admin = {
+        show: () => {
+            const pw = prompt("请输入管理密码：");
+            if(pw === "666666") { 
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+        },
+        generate: () => {
+            const tid = document.getElementById('targetId').value.trim().toUpperCase();
+            if(tid) {
+                document.getElementById('authResult').innerText = Auth._GK(tid);
+            }
+        }
+    };
+    document.addEventListener('click', () => {
+        clickCount++; setTimeout(() => clickCount = 0, 2000);
+        if(clickCount >= 5) { Admin.show(); clickCount = 0; }
+    });
+    document.addEventListener('keydown', e => { if(e.key.toLowerCase() === 'm') Admin.show(); });
     let units=[], selectedId=null, history=[], scale=1;
-    function init(){
-        units=[];
-        for(let i=0;i<10;i++) units.push({id:i, team:i<5?'top':'bottom', energy:100, mirror:false, petMirror:false});
-        selectedId=null;
-    }
+    function init(){ units=[]; for(let i=0;i<10;i++) units.push({id:i, team:i<5?'top':'bottom', energy:100, mirror:false, petMirror:false}); }
     init();
-
-    function handleResize() {
-        const baseWidth = 1300; 
-        scale = Math.min(Math.max(window.innerWidth / baseWidth, 0.3), 1.5);
-        const container = document.getElementById('zoomContainer');
-        if(container) container.style.transform = `scale(${scale})`;
-    }
-
-    function showFloatText(unitId, text) {
-        const unitEl = document.getElementById(`unit-${unitId}`);
-        if(!unitEl) return;
-        const rect = unitEl.getBoundingClientRect();
-        const fieldRect = document.getElementById('field').getBoundingClientRect();
-        const x = (rect.left - fieldRect.left + rect.width/2) / scale;
-        const y = (rect.top - fieldRect.top) / scale;
-        const el = document.createElement('div');
-        el.className = 'floating-text';
-        el.innerText = text;
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        document.getElementById('effectLayer').appendChild(el);
-        setTimeout(() => el.remove(), 800);
-    }
-
+    function handleResize() { const baseWidth=1300; scale=Math.min(Math.max(window.innerWidth/baseWidth,0.3),1.5); const container=document.getElementById('zoomContainer'); if(container) container.style.transform=`scale(${scale})`; }
+    function showFloatText(unitId, text) { const unitEl=document.getElementById(`unit-${unitId}`); if(!unitEl) return; const rect=unitEl.getBoundingClientRect(); const fieldRect=document.getElementById('field').getBoundingClientRect(); const x=(rect.left-fieldRect.left+rect.width/2)/scale; const y=(rect.top-fieldRect.top)/scale; const el=document.createElement('div'); el.className='floating-text'; el.innerText=text; el.style.left=`${x}px`; el.style.top=`${y}px`; document.getElementById('effectLayer').appendChild(el); setTimeout(()=>el.remove(),800); }
     function renderUnit(u, label){
-        const isSel = selectedId === u.id;
-        const mCls = u.mirror ? 'on' : 'off';
-        const selectArea = `<div class="select-zone" onclick="event.stopPropagation();S.select(${u.id})"><span>${u.energy}</span></div>`;
-        const mirrorArea = `<div class="mirror-zone ${mCls}" onclick="event.stopPropagation();S.mirror(${u.id})">镜</div>`;
-        const barArea = `<div class="energy-bar"><div class="energy-fill" style="width:${u.energy}%; background:${u.energy>18?'var(--green)':'var(--red)'}"></div></div>`;
-        const petArea = `<div class="pet ${u.petMirror?'on':''}" onclick="event.stopPropagation();S.petMirror(${u.id})">${label}</div>`;
-
-        let charContent = u.team === 'top' ? `${selectArea}${mirrorArea}` : `${mirrorArea}${selectArea}`;
-        let content = u.team === 'top' 
-            ? `${barArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${petArea}`
-            : `${petArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${barArea}`;
-
+        const isSel=selectedId===u.id; const mCls=u.mirror?'on':'off';
+        const selectArea=`<div class="select-zone" onclick="event.stopPropagation();S.select(${u.id})"><span>${u.energy}</span></div>`;
+        const mirrorArea=`<div class="mirror-zone ${mCls}" onclick="event.stopPropagation();S.mirror(${u.id})">镜</div>`;
+        const barArea=`<div class="energy-bar"><div class="energy-fill" style="width:${u.energy}%; background:${u.energy>18?'var(--primary)':'var(--red)'}"></div></div>`;
+        const petArea=`<div class="pet ${u.petMirror?'on':''}" onclick="event.stopPropagation();S.petMirror(${u.id})">${label}</div>`;
+        let charContent=u.team==='top'?`${selectArea}${mirrorArea}`:`${mirrorArea}${selectArea}`;
+        let content=u.team==='top'?`${barArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${petArea}`:`${petArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${barArea}`;
         return `<div class="unit" id="unit-${u.id}" style="width:144px;">${content}</div>`;
     }
-
     function render(){
         const layer = document.getElementById('unitLayer');
         let html = '<div class="team-row team-a">';
@@ -218,51 +181,26 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         units.slice(5,10).forEach((u,i)=> html += renderUnit(u, 'B'+(i+1)));
         html += '</div>';
         layer.innerHTML = html;
-
         const r1 = [{l:'精灵',c:8},{l:'极转',c:18,cls:'purple'},{l:'全医',c:16},{l:'镜像',c:4},{l:'口袋',c:3}];
         const r2 = [{l:'黑滋',c:24},{l:'黑恩',c:40,cls:'blue'},{l:'光滋',c:17},{l:'光恩',c:28},{l:'灵力',c:30,cls:'orange'},{l:'光灵',c:21,cls:'lightblue'}];
-        const btnStyle = 'font-size:30px;font-weight:900'; 
-        const costStyle = 'font-size:24px;font-weight:900;margin-left:8px;opacity:0.8';
-
-        document.getElementById('row1').innerHTML = r1.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${i+1} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
-        document.getElementById('row2').innerHTML = r2.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${i+6} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
-        document.getElementById('row3').innerHTML = `
-            <button class="skill-btn primary" onclick="S.fill()"><span style="${btnStyle}">Q 补满气量</span></button>
-            <button class="skill-btn reset" onclick="S.reset()"><span style="${btnStyle}">R 全部重置</span></button>
-            <button class="skill-btn default" style="background:var(--reset-gray)" onclick="S.undo()"><span style="${btnStyle}">Z 撤销一步</span></button>`;
+        document.getElementById('row1').innerHTML = r1.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="font-size:30px;font-weight:900">${i+1} ${s.l}</span><span style="font-size:24px;margin-left:8px;opacity:0.8">-${s.c}</span></button>`).join('');
+        document.getElementById('row2').innerHTML = r2.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="font-size:30px;font-weight:900">${i+6} ${s.l}</span><span style="font-size:24px;margin-left:8px;opacity:0.8">-${s.c}</span></button>`).join('');
+        document.getElementById('row3').innerHTML = `<button class="skill-btn primary" onclick="S.fill()"><span style="font-size:30px;font-weight:900">Q 补满气量</span></button><button class="skill-btn reset" onclick="S.reset()"><span style="font-size:30px;font-weight:900">R 全部重置</span></button><button class="skill-btn default" style="background:var(--reset-gray)" onclick="S.undo()"><span style="font-size:30px;font-weight:900">Z 撤销一步</span></button>`;
     }
-
     window.S = {
         select: id => { selectedId = (selectedId === id ? null : id); render(); },
         clearSelect: () => { if(selectedId!==null){ selectedId=null; render(); } },
         mirror: id => { history.push(JSON.stringify(units)); units[id].mirror = !units[id].mirror; render(); },
         petMirror: id => { history.push(JSON.stringify(units)); units[id].petMirror = !units[id].petMirror; render(); },
-        skill: cost => { 
-            if(selectedId!==null){ 
-                history.push(JSON.stringify(units)); 
-                showFloatText(selectedId, `-${cost}`);
-                units[selectedId].energy = Math.max(0, units[selectedId].energy - cost); 
-                selectedId = null; 
-                render(); 
-            } 
-        },
+        skill: cost => { if(selectedId!==null){ history.push(JSON.stringify(units)); showFloatText(selectedId, `-${cost}`); units[selectedId].energy = Math.max(0, units[selectedId].energy - cost); selectedId = null; render(); } },
         fill: () => { if(selectedId!==null){ history.push(JSON.stringify(units)); units[selectedId].energy = 100; selectedId = null; render(); } },
         undo: () => { if(history.length){ units = JSON.parse(history.pop()); render(); } },
         reset: () => { if(confirm("重置战场？")){ init(); render(); } }
     };
-
     const skillMap={'1':8,'2':18,'3':16,'4':4,'5':3,'6':24,'7':40,'8':17,'9':28};
-    document.addEventListener('keydown', e => {
-        const key = e.key.toLowerCase();
-        if(key === 'z') S.undo(); else if(key === 'q') S.fill(); else if(key === 'r') S.reset(); else if(skillMap[key]) S.skill(skillMap[key]);
-    });
-
+    document.addEventListener('keydown', e => { const key = e.key.toLowerCase(); if(key === 'z') S.undo(); else if(key === 'q') S.fill(); else if(key === 'r') S.reset(); else if(skillMap[key]) S.skill(skillMap[key]); });
     window.addEventListener('resize', handleResize);
-    window.addEventListener('load', () => { 
-        Auth.init(); // 运行授权初始化
-        handleResize(); 
-        render(); 
-    });
+    window.addEventListener('load', () => { Auth.init(); handleResize(); render(); });
 })();
 </script>
 </body>
