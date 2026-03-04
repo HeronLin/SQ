@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>石器时代战斗追踪器 - 啉b制作 (稳定修复版)</title>
+<title>石器时代战斗追踪器 - 啉b制作 (复制增强版)</title>
 <style>
 /* 保持原有排版样式不变 */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -33,7 +33,6 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .pet.on { background: var(--mirror-red) !important; color: white !important; border-color: var(--mirror-red) !important; }
 .floating-text { position: absolute; color: var(--red); font-size: 44px; font-weight: 900; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 1000; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; }
 @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90px); opacity: 0; } }
-/* 阵营坐标 */
 .team-a .unit:nth-child(1) .pet { transform: translate(25px, 63px) rotate(-34deg) scale(1.1); } 
 .team-a .unit:nth-child(2) .pet { transform: translate(55px, 39px) rotate(-34deg) scale(1.1); } 
 .team-a .unit:nth-child(3) .pet { transform: translate(85px, 15px) rotate(-34deg) scale(1.1); } 
@@ -66,22 +65,25 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .skill-btn.lightblue { background: var(--lightblue); }
 .skill-btn.primary { background: var(--primary); }
 .skill-btn.reset { background: var(--reset-gray); }
-.legend { text-align: center; font-size: 14px; color: var(--muted); margin-top: 8px; }
 
-/* 安全遮罩 */
+/* 安全遮罩与复制增强 */
 #authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-family: sans-serif;}
 #authOverlay input { width:300px; padding:15px; border-radius:10px; border:none; margin-bottom:20px; font-size:18px; text-align:center; outline:none; color:#000; }
-#authOverlay button { width:300px; height:50px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px; }
-#adminPanel { position:fixed; top:20px; right:20px; background:white; border:3px solid var(--primary); padding:20px; border-radius:15px; z-index:10000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.2); color:#000; }
+#authOverlay button { width:300px; height:50px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px; margin-bottom:10px; }
+#deviceId { background:#334155; padding:10px 20px; border-radius:5px; font-family:monospace; margin-bottom:10px; font-size:24px; cursor:pointer; border: 1px dashed var(--muted); }
+#adminPanel { position:fixed; top:20px; right:20px; background:white; border:3px solid var(--primary); padding:20px; border-radius:15px; z-index:10000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.2); color:#000; width:300px; }
 #adminPanel input { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; }
+#authResult { margin-top:10px; padding:15px; background:#f1f5f9; word-break:break-all; color:var(--red); font-weight:bold; text-align:center; cursor:pointer; border-radius:5px; font-size:20px; }
+.copy-tip { font-size:12px; color:var(--primary); margin-bottom:20px; }
 </style>
 </head>
 <body onclick="S.clearSelect()">
 
 <div id="authOverlay">
     <h2 style="color:var(--primary);margin-bottom:20px;">系统授权</h2>
-    <p style="margin-bottom:10px;opacity:0.8;">您的设备特征码:</p>
-    <div id="deviceId" style="background:#334155;padding:10px 20px;border-radius:5px;font-family:monospace;margin-bottom:30px;font-size:24px;">加载中...</div>
+    <p style="margin-bottom:10px;opacity:0.8;">点击下方特征码自动复制，发给管理员:</p>
+    <div id="deviceId" onclick="Helper.copyText('deviceId', '特征码已复制')">加载中...</div>
+    <div class="copy-tip">点击上方 ID 即可快速复制</div>
     <input type="text" id="authKeyInput" placeholder="输入授权码">
     <button onclick="Auth.doVerify()">解锁系统</button>
 </div>
@@ -89,15 +91,16 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 <div id="adminPanel">
     <h3 style="color:var(--primary);margin-bottom:10px;">管理后台</h3>
     <input type="text" id="targetId" placeholder="贴入特征码">
-    <button onclick="Admin.generate()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">生成授权码</button>
-    <div id="authResult" style="margin-top:10px; padding:10px; background:#f1f5f9; word-break:break-all; color:var(--red); font-weight:bold; text-align:center;"></div>
+    <button onclick="Admin.generate()" style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;">生成授权码</button>
+    <div id="authResult" onclick="Helper.copyText('authResult', '授权码已复制')">等待生成...</div>
+    <p style="text-align:center; font-size:11px; color:gray; margin-top:5px;">点击上方结果直接复制</p>
     <button onclick="document.getElementById('adminPanel').style.display='none'" style="margin-top:10px; width:100%; background:none; border:none; color:gray; cursor:pointer;">关闭</button>
 </div>
 
 <div class="app" id="mainApp" onclick="event.stopPropagation()">
     <div class="header">
-        <div class="title">石器时代战斗追踪器 - 啉b制作</div>
-        <div class="status-info" id="scaleInfo">正版已授权</div>
+        <div class="title">石器时代战斗追踪器 - 制作人: 啉b</div>
+        <div class="status-info">正版已授权</div>
     </div>
     <div class="zoom-container" id="zoomContainer">
         <div class="field-container" id="field" onclick="S.clearSelect()">
@@ -115,7 +118,22 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 
 <script>
 (function(){
-    // --- 安全系统 (修正版) ---
+    // --- 复制助手 ---
+    window.Helper = {
+        copyText: (id, msg) => {
+            const text = document.getElementById(id).innerText;
+            if(!text || text.includes('加载中') || text.includes('等待生成')) return;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert(msg);
+        }
+    };
+
+    // --- 安全系统 ---
     window.Auth = {
         _S: "LB_STONE_FINAL_2026", 
         _BL_URL: "https://raw.githubusercontent.com/heronlin/SQ/main/blacklist.txt",
@@ -126,7 +144,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             return Math.abs(h).toString(36).toUpperCase();
         },
         _GK: (id) => {
-            let s = id.trim().toUpperCase() + Auth._S; // 增加 trim 排除空格干扰
+            let s = id.trim().toUpperCase() + Auth._S; 
             let r = 0;
             for (let i = 0; i < s.length; i++) r = ((r << 5) - r) + s.charCodeAt(i);
             return "LB" + Math.abs(r).toString(16).toUpperCase();
@@ -140,7 +158,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
                     const list = await res.text();
                     if (list.split('\n').map(s => s.trim()).includes(devId)) {
                         localStorage.removeItem('_AUTH_OK');
-                        document.body.innerHTML = "<div style='background:#000;color:#fff;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;'><h2>🚫 设备已被系统锁定</h2><p style='margin-top:10px;opacity:0.6;'>ID: "+devId+"</p></div>";
+                        document.body.innerHTML = "<div style='background:#000;color:#fff;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;'><h2>🚫 设备已被系统锁定</h2></div>";
                         return;
                     }
                 }
@@ -158,7 +176,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             if(input === Auth._GK(Auth._GID())) {
                 localStorage.setItem('_AUTH_OK', input);
                 location.reload();
-            } else { alert("授权码错误，请检查是否有空格或输错"); }
+            } else { alert("授权码错误！请点击特征码重新生成。"); }
         }
     };
 
@@ -168,7 +186,8 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         generate: () => { 
             const tid = document.getElementById('targetId').value.trim().toUpperCase(); 
             if(!tid) { alert("请输入特征码"); return; }
-            document.getElementById('authResult').innerText = Auth._GK(tid); 
+            const code = Auth._GK(tid);
+            document.getElementById('authResult').innerText = code; 
         }
     };
     document.addEventListener('click', () => { clicks++; setTimeout(()=>clicks=0, 1500); if(clicks>=5) Admin.show(); });
@@ -178,7 +197,6 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
     function init(){
         units=[];
         for(let i=0;i<10;i++) units.push({id:i, team:i<5?'top':'bottom', energy:100, mirror:false, petMirror:false});
-        selectedId=null;
     }
     init();
 
