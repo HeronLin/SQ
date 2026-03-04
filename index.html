@@ -58,7 +58,8 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .team-b .unit:nth-child(5) { left: 950px; top: 295px; }
 .controls-area { width: 1250px; padding: 15px; border-top: 1px solid #e2e8f0; background: #fff; margin-top: 30px; }
 .skill-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; }
-.skill-row-2 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 12px; }
+/* 修改列数为7 以容纳新增的单转按钮 */
+.skill-row-2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 12px; }
 .bottom-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .skill-btn { border: none; border-radius: 10px; height: 70px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .skill-btn.default { background: #64748b; }
@@ -112,18 +113,17 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             <div class="skill-panel" id="row1"></div>
             <div class="skill-row-2" id="row2"></div>
             <div class="bottom-row" id="row3"></div>
-            <div class="legend">快捷键: 1-9 | Q 补满 | R 重置 | Z 撤销 | 连点5下开启管理</div>
+            <div class="legend">快捷键: 1-9 | 0 单转 | N 灵力 | M 光灵 | Q 补满 | R 重置 | Z 撤销</div>
         </div>
     </div>
 </div>
 
 <script>
 (function(){
-    // --- 安全与云端拉黑系统 (异步) ---
+    // --- 安全与云端拉黑系统 ---
     window.Auth = {
         _S: "LB_STONE_FINAL_2026", 
         _BL_URL: "https://raw.githubusercontent.com/heronlin/SQ/main/blacklist.txt",
-        
         _GID: () => {
             const d = navigator.userAgent + screen.colorDepth + (navigator.hardwareConcurrency || 4);
             let h = 5381;
@@ -139,8 +139,6 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         init: async () => {
             const devId = Auth._GID();
             document.getElementById('deviceId').innerText = devId;
-
-            // 1. 云端拉黑校验
             try {
                 const res = await fetch(Auth._BL_URL + '?t=' + Date.now());
                 if (res.ok) {
@@ -151,9 +149,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
                         return;
                     }
                 }
-            } catch (e) { console.warn("云端通信跳过"); }
-
-            // 2. 授权状态校验
+            } catch (e) {}
             if(localStorage.getItem('_AUTH_OK') === Auth._GK(devId)) {
                 document.getElementById('mainApp').style.display = 'flex';
                 handleResize(); 
@@ -171,7 +167,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         }
     };
 
-    // --- 管理器 ---
+    // --- 管理器 (快捷键改为 [ 键) ---
     let clicks = 0;
     window.Admin = {
         show: () => { if(prompt("管理密码") === "666666") document.getElementById('adminPanel').style.display = 'block'; },
@@ -179,7 +175,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
     };
     document.addEventListener('click', () => { clicks++; setTimeout(()=>clicks=0, 1500); if(clicks>=5) Admin.show(); });
 
-    // --- 战场追踪逻辑 (保留原有算法) ---
+    // --- 战场追踪逻辑 ---
     let units=[], selectedId=null, history=[], scale=1;
     function init(){
         units=[];
@@ -235,12 +231,18 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         layer.innerHTML = html;
 
         const r1 = [{l:'精灵',c:8},{l:'极转',c:18,cls:'purple'},{l:'全医',c:16},{l:'镜像',c:4},{l:'口袋',c:3}];
-        const r2 = [{l:'黑滋',c:24},{l:'黑恩',c:40,cls:'blue'},{l:'光滋',c:17},{l:'光恩',c:28},{l:'灵力',c:30,cls:'orange'},{l:'光灵',c:21,cls:'lightblue'}];
+        // 修改第二行：增加了单转，修改了快捷键显示
+        const r2 = [
+            {l:'黑滋',c:24,k:'6'},{l:'黑恩',c:40,cls:'blue',k:'7'},{l:'光滋',c:17,k:'8'},
+            {l:'光恩',c:28,k:'9'},{l:'单转',c:10,cls:'purple',k:'0'},
+            {l:'灵力',c:30,cls:'orange',k:'N'},{l:'光灵',c:21,cls:'lightblue',k:'M'}
+        ];
+        
         const btnStyle = 'font-size:30px;font-weight:900'; 
         const costStyle = 'font-size:24px;font-weight:900;margin-left:8px;opacity:0.8';
 
         document.getElementById('row1').innerHTML = r1.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${i+1} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
-        document.getElementById('row2').innerHTML = r2.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${i+6} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
+        document.getElementById('row2').innerHTML = r2.map((s)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${s.k} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
         document.getElementById('row3').innerHTML = `
             <button class="skill-btn primary" onclick="S.fill()"><span style="${btnStyle}">Q 补满气量</span></button>
             <button class="skill-btn reset" onclick="S.reset()"><span style="${btnStyle}">R 全部重置</span></button>
@@ -266,15 +268,23 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         reset: () => { if(confirm("重置战场？")){ init(); render(); } }
     };
 
-    const skillMap={'1':8,'2':18,'3':16,'4':4,'5':3,'6':24,'7':40,'8':17,'9':28};
+    // --- 快捷键映射更新 ---
+    const skillMap={
+        '1':8,'2':18,'3':16,'4':4,'5':3,
+        '6':24,'7':40,'8':17,'9':28,'0':10,
+        'n':30,'m':21
+    };
     document.addEventListener('keydown', e => {
         const key = e.key.toLowerCase();
-        if(key === 'z') S.undo(); else if(key === 'q') S.fill(); else if(key === 'r') S.reset(); else if(skillMap[key]) S.skill(skillMap[key]);
-        if(key === 'm') Admin.show();
+        if(key === 'z') S.undo(); 
+        else if(key === 'q') S.fill(); 
+        else if(key === 'r') S.reset(); 
+        else if(key === '[') Admin.show(); // 管理员快捷键改为 [
+        else if(skillMap[key]) S.skill(skillMap[key]);
     });
 
     window.addEventListener('resize', handleResize);
-    window.addEventListener('load', Auth.init); // 改为调用 Auth.init
+    window.addEventListener('load', Auth.init);
 })();
 </script>
 </body>
