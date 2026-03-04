@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>石器时代战斗追踪器 - 啉b制作 (安全增强版)</title>
+<title>石器时代战斗追踪器 - 啉b制作 (稳定修复版)</title>
 <style>
-/* -------------------------------------------------------------------------
-   保留用户原有样式 - 严禁改动
-   ------------------------------------------------------------------------- */
+/* 保持原有排版样式不变 */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root {
-  --bg: #ffffff; 
-  --card: #ffffff; --border: #cbd5e1; --fg: #0f172a; --muted: #64748b;
+  --bg: #ffffff; --card: #ffffff; --border: #cbd5e1; --fg: #0f172a; --muted: #64748b;
   --primary: #22c55e; --primary-fg: #ffffff; --red: #ef4444; --yellow: #f59e0b;
   --green: #10b981; --mirror-red: #ff3b30; --purple: #8b5cf6; --blue: #3b82f6;
   --orange: #f97316; --lightblue: #0ea5e9; --secondary: #f1f5f9; --reset-gray: #94a3b8;
@@ -36,6 +33,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .pet.on { background: var(--mirror-red) !important; color: white !important; border-color: var(--mirror-red) !important; }
 .floating-text { position: absolute; color: var(--red); font-size: 44px; font-weight: 900; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 1000; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; }
 @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90px); opacity: 0; } }
+/* 阵营坐标 */
 .team-a .unit:nth-child(1) .pet { transform: translate(25px, 63px) rotate(-34deg) scale(1.1); } 
 .team-a .unit:nth-child(2) .pet { transform: translate(55px, 39px) rotate(-34deg) scale(1.1); } 
 .team-a .unit:nth-child(3) .pet { transform: translate(85px, 15px) rotate(-34deg) scale(1.1); } 
@@ -58,7 +56,6 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .team-b .unit:nth-child(5) { left: 950px; top: 295px; }
 .controls-area { width: 1250px; padding: 15px; border-top: 1px solid #e2e8f0; background: #fff; margin-top: 30px; }
 .skill-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; }
-/* 修改列数为7 以容纳新增的单转按钮 */
 .skill-row-2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 12px; }
 .bottom-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .skill-btn { border: none; border-radius: 10px; height: 70px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -71,9 +68,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .skill-btn.reset { background: var(--reset-gray); }
 .legend { text-align: center; font-size: 14px; color: var(--muted); margin-top: 8px; }
 
-/* -------------------------------------------------------------------------
-   新增安全模块样式 - 独立封装
-   ------------------------------------------------------------------------- */
+/* 安全遮罩 */
 #authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; font-family: sans-serif;}
 #authOverlay input { width:300px; padding:15px; border-radius:10px; border:none; margin-bottom:20px; font-size:18px; text-align:center; outline:none; color:#000; }
 #authOverlay button { width:300px; height:50px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:18px; }
@@ -113,14 +108,14 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             <div class="skill-panel" id="row1"></div>
             <div class="skill-row-2" id="row2"></div>
             <div class="bottom-row" id="row3"></div>
-            <div class="legend">快捷键: 1-9 | 0 单转 | N 灵力 | M 光灵 | Q 补满 | R 重置 | Z 撤销</div>
+            <div class="legend">快捷键: 1-9 | 0 单转 | N 灵力 | M 光灵 | Q 补满 | R 重置 | Z 撤销 | [ 管理</div>
         </div>
     </div>
 </div>
 
 <script>
 (function(){
-    // --- 安全与云端拉黑系统 ---
+    // --- 安全系统 (修正版) ---
     window.Auth = {
         _S: "LB_STONE_FINAL_2026", 
         _BL_URL: "https://raw.githubusercontent.com/heronlin/SQ/main/blacklist.txt",
@@ -131,7 +126,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             return Math.abs(h).toString(36).toUpperCase();
         },
         _GK: (id) => {
-            let s = id + Auth._S;
+            let s = id.trim().toUpperCase() + Auth._S; // 增加 trim 排除空格干扰
             let r = 0;
             for (let i = 0; i < s.length; i++) r = ((r << 5) - r) + s.charCodeAt(i);
             return "LB" + Math.abs(r).toString(16).toUpperCase();
@@ -163,19 +158,22 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             if(input === Auth._GK(Auth._GID())) {
                 localStorage.setItem('_AUTH_OK', input);
                 location.reload();
-            } else { alert("授权码错误"); }
+            } else { alert("授权码错误，请检查是否有空格或输错"); }
         }
     };
 
-    // --- 管理器 (快捷键改为 [ 键) ---
     let clicks = 0;
     window.Admin = {
         show: () => { if(prompt("管理密码") === "666666") document.getElementById('adminPanel').style.display = 'block'; },
-        generate: () => { const tid = document.getElementById('targetId').value.trim().toUpperCase(); document.getElementById('authResult').innerText = tid ? Auth._GK(tid) : "输入特征码"; }
+        generate: () => { 
+            const tid = document.getElementById('targetId').value.trim().toUpperCase(); 
+            if(!tid) { alert("请输入特征码"); return; }
+            document.getElementById('authResult').innerText = Auth._GK(tid); 
+        }
     };
     document.addEventListener('click', () => { clicks++; setTimeout(()=>clicks=0, 1500); if(clicks>=5) Admin.show(); });
 
-    // --- 战场追踪逻辑 ---
+    // --- 战场逻辑 ---
     let units=[], selectedId=null, history=[], scale=1;
     function init(){
         units=[];
@@ -215,9 +213,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         const barArea = `<div class="energy-bar"><div class="energy-fill" style="width:${u.energy}%; background:${u.energy>18?'var(--green)':'var(--red)'}"></div></div>`;
         const petArea = `<div class="pet ${u.petMirror?'on':''}" onclick="event.stopPropagation();S.petMirror(${u.id})">${label}</div>`;
         let charContent = u.team === 'top' ? `${selectArea}${mirrorArea}` : `${mirrorArea}${selectArea}`;
-        let content = u.team === 'top' 
-            ? `${barArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${petArea}`
-            : `${petArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${barArea}`;
+        let content = u.team === 'top' ? `${barArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${petArea}` : `${petArea}<div class="char-block ${isSel?'selected':''}">${charContent}</div>${barArea}`;
         return `<div class="unit" id="unit-${u.id}" style="width:144px;">${content}</div>`;
     }
 
@@ -231,7 +227,6 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         layer.innerHTML = html;
 
         const r1 = [{l:'精灵',c:8},{l:'极转',c:18,cls:'purple'},{l:'全医',c:16},{l:'镜像',c:4},{l:'口袋',c:3}];
-        // 修改第二行：增加了单转，修改了快捷键显示
         const r2 = [
             {l:'黑滋',c:24,k:'6'},{l:'黑恩',c:40,cls:'blue',k:'7'},{l:'光滋',c:17,k:'8'},
             {l:'光恩',c:28,k:'9'},{l:'单转',c:10,cls:'purple',k:'0'},
@@ -242,7 +237,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         const costStyle = 'font-size:24px;font-weight:900;margin-left:8px;opacity:0.8';
 
         document.getElementById('row1').innerHTML = r1.map((s,i)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${i+1} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
-        document.getElementById('row2').innerHTML = r2.map((s)=>`<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${s.k} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
+        document.getElementById('row2').innerHTML = r2.map(s => `<button class="skill-btn ${s.cls||'default'}" onclick="event.stopPropagation();S.skill(${s.c})"><span style="${btnStyle}">${s.k} ${s.l}</span><span style="${costStyle}">-${s.c}</span></button>`).join('');
         document.getElementById('row3').innerHTML = `
             <button class="skill-btn primary" onclick="S.fill()"><span style="${btnStyle}">Q 补满气量</span></button>
             <button class="skill-btn reset" onclick="S.reset()"><span style="${btnStyle}">R 全部重置</span></button>
@@ -254,32 +249,17 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         clearSelect: () => { if(selectedId!==null){ selectedId=null; render(); } },
         mirror: id => { history.push(JSON.stringify(units)); units[id].mirror = !units[id].mirror; render(); },
         petMirror: id => { history.push(JSON.stringify(units)); units[id].petMirror = !units[id].petMirror; render(); },
-        skill: cost => { 
-            if(selectedId!==null){ 
-                history.push(JSON.stringify(units)); 
-                showFloatText(selectedId, `-${cost}`);
-                units[selectedId].energy = Math.max(0, units[selectedId].energy - cost); 
-                selectedId = null; 
-                render(); 
-            } 
-        },
+        skill: cost => { if(selectedId!==null){ history.push(JSON.stringify(units)); showFloatText(selectedId, `-${cost}`); units[selectedId].energy = Math.max(0, units[selectedId].energy - cost); selectedId = null; render(); } },
         fill: () => { if(selectedId!==null){ history.push(JSON.stringify(units)); units[selectedId].energy = 100; selectedId = null; render(); } },
         undo: () => { if(history.length){ units = JSON.parse(history.pop()); render(); } },
         reset: () => { if(confirm("重置战场？")){ init(); render(); } }
     };
 
-    // --- 快捷键映射更新 ---
-    const skillMap={
-        '1':8,'2':18,'3':16,'4':4,'5':3,
-        '6':24,'7':40,'8':17,'9':28,'0':10,
-        'n':30,'m':21
-    };
+    const skillMap={'1':8,'2':18,'3':16,'4':4,'5':3,'6':24,'7':40,'8':17,'9':28,'0':10,'n':30,'m':21};
     document.addEventListener('keydown', e => {
         const key = e.key.toLowerCase();
-        if(key === 'z') S.undo(); 
-        else if(key === 'q') S.fill(); 
-        else if(key === 'r') S.reset(); 
-        else if(key === '[') Admin.show(); // 管理员快捷键改为 [
+        if(key === 'z') S.undo(); else if(key === 'q') S.fill(); else if(key === 'r') S.reset(); 
+        else if(key === '[') Admin.show(); 
         else if(skillMap[key]) S.skill(skillMap[key]);
     });
 
