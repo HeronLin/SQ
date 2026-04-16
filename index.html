@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>石器时代战斗追踪器 - 啉b制作 (复制增强版)</title>
+<title>石器时代战斗追踪器 - 增强版</title>
 <style>
 /* 保持原有排版样式不变 */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -46,8 +46,8 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .team-a .unit:nth-child(1) { left: 60px;  top: 255px; } 
 .team-a .unit:nth-child(2) { left: 175px; top: 180px; } 
 .team-a .unit:nth-child(3) { left: 290px; top: 105px; } 
-.team-a .unit:nth-child(4) { left: 405px; top: 30px;  }  
-.team-a .unit:nth-child(5) { left: 520px; top: -45px; }    
+.team-a .unit:nth-child(4) { left: 405px; top: 30px;  }   
+.team-a .unit:nth-child(5) { left: 520px; top: -45px; }      
 .team-b .unit:nth-child(1) { left: 490px; top: 595px; } 
 .team-b .unit:nth-child(2) { left: 605px; top: 520px; } 
 .team-b .unit:nth-child(3) { left: 720px; top: 445px; } 
@@ -55,7 +55,8 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
 .team-b .unit:nth-child(5) { left: 950px; top: 295px; }
 .controls-area { width: 1250px; padding: 15px; border-top: 1px solid #e2e8f0; background: #fff; margin-top: 30px; }
 .skill-panel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; }
-.skill-row-2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 12px; }
+/* 修改点：为了容纳新增按钮，列数改为 8 */
+.skill-row-2 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 12px; }
 .bottom-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .skill-btn { border: none; border-radius: 10px; height: 70px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .skill-btn.default { background: #64748b; }
@@ -111,7 +112,7 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
             <div class="skill-panel" id="row1"></div>
             <div class="skill-row-2" id="row2"></div>
             <div class="bottom-row" id="row3"></div>
-            <div class="legend">快捷键: 1-9 | 0 单转 | N 灵力 | M 光灵 | Q 补满 | R 重置 | Z 撤销 | [ 管理</div>
+            <div class="legend">快捷键: · 属性 | 1-9 | 0 单转 | N 灵力 | M 光灵 | Q 补满 | R 重置 | Z 撤销 | [ 管理</div>
         </div>
     </div>
 </div>
@@ -245,7 +246,9 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         layer.innerHTML = html;
 
         const r1 = [{l:'精灵',c:8},{l:'极转',c:18,cls:'purple'},{l:'全医',c:16},{l:'镜像',c:4},{l:'口袋',c:3}];
+        // 修改点：在第二行首位增加“属性”
         const r2 = [
+            {l:'属性',c:9,cls:'orange',k:'·'},
             {l:'黑滋',c:24,k:'6'},{l:'黑恩',c:40,cls:'blue',k:'7'},{l:'光滋',c:17,k:'8'},
             {l:'光恩',c:28,k:'9'},{l:'单转',c:10,cls:'purple',k:'0'},
             {l:'灵力',c:30,cls:'orange',k:'N'},{l:'光灵',c:21,cls:'lightblue',k:'M'}
@@ -273,9 +276,17 @@ html,body { background: var(--bg); color: var(--fg); font-family: sans-serif; he
         reset: () => { if(confirm("重置战场？")){ init(); render(); } }
     };
 
-    const skillMap={'1':8,'2':18,'3':16,'4':4,'5':3,'6':24,'7':40,'8':17,'9':28,'0':10,'n':30,'m':21};
+    // 修改点：映射表中增加 ` 为 9
+    const skillMap={'1':8,'2':18,'3':16,'4':4,'5':3,'6':24,'7':40,'8':17,'9':28,'0':10,'n':30,'m':21,'`':9};
     document.addEventListener('keydown', e => {
         const key = e.key.toLowerCase();
+        
+        // 修改点：精准识别物理键位 Backquote
+        if (e.code === 'Backquote') {
+            S.skill(9);
+            return;
+        }
+
         if(key === 'z') S.undo(); else if(key === 'q') S.fill(); else if(key === 'r') S.reset(); 
         else if(key === '[') Admin.show(); 
         else if(skillMap[key]) S.skill(skillMap[key]);
